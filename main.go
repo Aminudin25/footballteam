@@ -5,10 +5,12 @@ import (
 	"log"
 	"time"
 
+	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 
+	"footballteam/handler"
 	"footballteam/user"
 )
 
@@ -30,6 +32,19 @@ func main() {
 
 	// Jalankan seeder admin
 	seedAdminUser(db)
+
+	userRepository := user.NewRepository(db)
+	userService := user.NewService(userRepository) 
+	userHandler := handler.NewUserHandler(userService)
+
+	router := gin.Default()
+	api := router.Group("/api/v1")
+
+	api.POST("/sessions", userHandler.Login)
+
+	router.Run()
+	
+
 }
 
 // Seeder admin user default
