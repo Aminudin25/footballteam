@@ -1,0 +1,2086 @@
+{
+	"info": {
+		"_postman_id": "a661c197-d9fd-4c33-8dcb-42e7add3fae5",
+		"name": "FootballTeam",
+		"description": "FootballTeam API adalah RESTful API yang digunakan untuk mengelola data klub sepak bola, pemain, jadwal pertandingan, dan hasil pertandingan. API ini ditujukan untuk **admin perusahaan** agar dapat melakukan operasi CRUD serta mendapatkan laporan hasil pertandingan secara real-time.\n\nAPI ini dibangun menggunakan **Golang**, **Gin framework**, dan **GORM** untuk manajemen database MySQL. Autentikasi menggunakan **JWT** untuk rute yang dilindungi (admin-only).",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "9770363"
+	},
+	"item": [
+		{
+			"name": "Session",
+			"item": [
+				{
+					"name": "Login",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"email\" : \"admin@xyz.com\",\r\n    \"password\" : \"admin123\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/sessions",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"sessions"
+							]
+						},
+						"description": "Login admin untuk mendapatkan JWT token. Token digunakan untuk mengakses rute yang dilindungi"
+					},
+					"response": [
+						{
+							"name": "success",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"email\" : \"admin@xyz.com\",\r\n    \"password\" : \"admin123\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "/sessions",
+									"path": [
+										"sessions"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": null,
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Date",
+									"value": "Sun, 19 Oct 2025 11:06:37 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "238"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"meta\": {\n        \"message\": \"Successfuly loggedin\",\n        \"code\": 200,\n        \"status\": \"success\"\n    },\n    \"data\": {\n        \"id\": 1,\n        \"name\": \"Admin\",\n        \"email\": \"admin@xyz.com\",\n        \"token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxfQ.yR5610T3yfnOGg3UxkKc1LGbB107pJHguUMwJvBNTOs\"\n    }\n}"
+						},
+						{
+							"name": "failed",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"email\" : \"admin1@xyz.com\",\r\n    \"password\" : \"admin123\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/sessions",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"sessions"
+									]
+								}
+							},
+							"status": "Unprocessable Entity",
+							"code": 422,
+							"_postman_previewlanguage": null,
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Date",
+									"value": "Sun, 19 Oct 2025 11:06:55 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "111"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"meta\": {\n        \"message\": \"Login failed\",\n        \"code\": 422,\n        \"status\": \"error\"\n    },\n    \"data\": {\n        \"errors\": \"No user found on that email\"\n    }\n}"
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Team",
+			"item": [
+				{
+					"name": "Get All Teams",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/teams",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"teams"
+							]
+						},
+						"description": "Menampilkan semua tim yang ada | PUBLIC (Tidak perlu Auth)"
+					},
+					"response": [
+						{
+							"name": "success",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "/teams",
+									"path": [
+										"teams"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": null,
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Date",
+									"value": "Sun, 19 Oct 2025 11:07:14 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "289"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"meta\": {\n        \"message\": \"List of teams\",\n        \"code\": 200,\n        \"status\": \"success\"\n    },\n    \"data\": [\n        {\n            \"id\": 1,\n            \"name\": \"Garuda FC\",\n            \"logo\": \"\",\n            \"year_founded\": 1998,\n            \"address\": \"Jl. Merdeka No. 1\",\n            \"city\": \"Jakarta\"\n        },\n        {\n            \"id\": 2,\n            \"name\": \"Pahlawan FC\",\n            \"logo\": \"\",\n            \"year_founded\": 2005,\n            \"address\": \"Jl. Pahlawan No. 7\",\n            \"city\": \"Surabaya\"\n        }\n    ]\n}"
+						}
+					]
+				},
+				{
+					"name": "Get Team by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/teams/1",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"teams",
+								"1"
+							]
+						},
+						"description": "Menampilkan detail team berdasarkan :id yang dimasukan lewat Params"
+					},
+					"response": [
+						{
+							"name": "success",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "/teams/1",
+									"path": [
+										"teams",
+										"1"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": null,
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Date",
+									"value": "Sun, 19 Oct 2025 11:08:05 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "176"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"meta\": {\n        \"message\": \"Team detail\",\n        \"code\": 200,\n        \"status\": \"success\"\n    },\n    \"data\": {\n        \"id\": 1,\n        \"name\": \"Garuda FC\",\n        \"logo\": \"\",\n        \"year_founded\": 1998,\n        \"address\": \"Jl. Merdeka No. 1\",\n        \"city\": \"Jakarta\"\n    }\n}"
+						},
+						{
+							"name": "failed",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/teams/100",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"teams",
+										"100"
+									]
+								}
+							},
+							"status": "Not Found",
+							"code": 404,
+							"_postman_previewlanguage": null,
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Date",
+									"value": "Sun, 19 Oct 2025 11:08:25 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "77"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"meta\": {\n        \"message\": \"Team not found\",\n        \"code\": 404,\n        \"status\": \"error\"\n    },\n    \"data\": null\n}"
+						}
+					]
+				},
+				{
+					"name": "Create Team",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxfQ.yR5610T3yfnOGg3UxkKc1LGbB107pJHguUMwJvBNTOs",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"name\": \"Indonesia FC\",\r\n  \"year_founded\": 2001,\r\n  \"address\": \"Jl. Stadion No. 10\",\r\n  \"city\": \"Jakarta\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/teams",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"teams"
+							]
+						},
+						"description": "Hanya admin yang bisa membuat tim baru. Validasi mencegah tim duplikat"
+					},
+					"response": [
+						{
+							"name": "success",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxfQ.yR5610T3yfnOGg3UxkKc1LGbB107pJHguUMwJvBNTOs",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"name\": \"Indonesia FC\",\r\n  \"year_founded\": 2001,\r\n  \"address\": \"Jl. Stadion No. 10\",\r\n  \"city\": \"Jakarta\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "/teams",
+									"path": [
+										"teams"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": null,
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Date",
+									"value": "Sun, 19 Oct 2025 11:08:49 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "181"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"meta\": {\n        \"message\": \"Team created\",\n        \"code\": 200,\n        \"status\": \"success\"\n    },\n    \"data\": {\n        \"id\": 3,\n        \"name\": \"Indonesia FC\",\n        \"logo\": \"\",\n        \"year_founded\": 2001,\n        \"address\": \"Jl. Stadion No. 10\",\n        \"city\": \"Jakarta\"\n    }\n}"
+						},
+						{
+							"name": "failed",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxfQ.yR5610T3yfnOGg3UxkKc1LGbB107pJHguUMwJvBNTOs",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"name\": \"Indonesia FC\",\r\n  \"year_founded\": 2001,\r\n  \"address\": \"Jl. Stadion No. 10\",\r\n  \"city\": \"Jakarta\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/teams",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"teams"
+									]
+								}
+							},
+							"status": "Internal Server Error",
+							"code": 500,
+							"_postman_previewlanguage": null,
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Date",
+									"value": "Sun, 19 Oct 2025 11:19:54 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "81"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"meta\": {\n        \"message\": \"Create team failed\",\n        \"code\": 500,\n        \"status\": \"error\"\n    },\n    \"data\": null\n}"
+						}
+					]
+				},
+				{
+					"name": "Upload Logo",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxfQ.yR5610T3yfnOGg3UxkKc1LGbB107pJHguUMwJvBNTOs",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "logo",
+									"type": "file",
+									"src": "/C:/Users/amin/Downloads/pngtree-logo-garuda-indonesia-pancasila-day-vector-png-image_7768875.png"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/teams/2/logo",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"teams",
+								"2",
+								"logo"
+							]
+						},
+						"description": "Upload Logo Team berdasarkan team :id yang dimasukan pada bagian params"
+					},
+					"response": [
+						{
+							"name": "failed",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxfQ.yR5610T3yfnOGg3UxkKc1LGbB107pJHguUMwJvBNTOs",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "logo",
+											"type": "file",
+											"src": []
+										}
+									]
+								},
+								"url": {
+									"raw": "/teams/2/logo",
+									"path": [
+										"teams",
+										"2",
+										"logo"
+									]
+								}
+							},
+							"status": "Bad Request",
+							"code": 400,
+							"_postman_previewlanguage": null,
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Date",
+									"value": "Sun, 19 Oct 2025 11:20:30 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "97"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"meta\": {\n        \"message\": \"Logo upload failed\",\n        \"code\": 400,\n        \"status\": \"error\"\n    },\n    \"data\": \"http: no such file\"\n}"
+						},
+						{
+							"name": "success",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxfQ.yR5610T3yfnOGg3UxkKc1LGbB107pJHguUMwJvBNTOs",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "logo",
+											"type": "file",
+											"src": "/C:/Users/amin/Downloads/pngtree-logo-garuda-indonesia-pancasila-day-vector-png-image_7768875.png"
+										}
+									]
+								},
+								"url": {
+									"raw": "{{base_url}}/teams/2/logo",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"teams",
+										"2",
+										"logo"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": null,
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Date",
+									"value": "Sun, 19 Oct 2025 11:21:59 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "201"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"meta\": {\n        \"message\": \"Logo uploaded successfully\",\n        \"code\": 200,\n        \"status\": \"success\"\n    },\n    \"data\": {\n        \"logo_url\": \"/uploads\\\\logo\\\\1760872919_pngtree-logo-garuda-indonesia-pancasila-day-vector-png-image_7768875.png\"\n    }\n}"
+						}
+					]
+				},
+				{
+					"name": "Cek Logo",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/uploads/logo/1760872919_pngtree-logo-garuda-indonesia-pancasila-day-vector-png-image_7768875.png",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"uploads",
+								"logo",
+								"1760872919_pngtree-logo-garuda-indonesia-pancasila-day-vector-png-image_7768875.png"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Team",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxfQ.yR5610T3yfnOGg3UxkKc1LGbB107pJHguUMwJvBNTOs",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"name\": \"Indonesia FC\",\r\n  \"year_founded\": 2001,\r\n  \"address\": \"Jl. Stadion No. 10\",\r\n  \"city\": \"Jakarta\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/teams/3",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"teams",
+								"3"
+							]
+						},
+						"description": "update team berdasarkan :id yang dimasukan lewat params"
+					},
+					"response": [
+						{
+							"name": "failed",
+							"originalRequest": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxfQ.yR5610T3yfnOGg3UxkKc1LGbB107pJHguUMwJvBNTOs",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"name\": \"Indonesia FC\",\r\n  \"year_founded\": 2001,\r\n  \"address\": \"Jl. Stadion No. 10\",\r\n  \"city\": \"Jakarta\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "/teams/1",
+									"path": [
+										"teams",
+										"1"
+									]
+								}
+							},
+							"status": "Internal Server Error",
+							"code": 500,
+							"_postman_previewlanguage": null,
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Date",
+									"value": "Sun, 19 Oct 2025 11:31:28 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "81"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"meta\": {\n        \"message\": \"Update team failed\",\n        \"code\": 500,\n        \"status\": \"error\"\n    },\n    \"data\": null\n}"
+						}
+					]
+				},
+				{
+					"name": "Delete Team",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxfQ.yR5610T3yfnOGg3UxkKc1LGbB107pJHguUMwJvBNTOs",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/teams/1",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"teams",
+								"1"
+							]
+						},
+						"description": "delete team (SoftDelete) berdasarkan :id yang dimasukan lewat params"
+					},
+					"response": [
+						{
+							"name": "success",
+							"originalRequest": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxfQ.yR5610T3yfnOGg3UxkKc1LGbB107pJHguUMwJvBNTOs",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "/teams/3",
+									"path": [
+										"teams",
+										"3"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": null,
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Date",
+									"value": "Sun, 19 Oct 2025 11:32:53 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "77"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"meta\": {\n        \"message\": \"Team deleted\",\n        \"code\": 200,\n        \"status\": \"success\"\n    },\n    \"data\": null\n}"
+						},
+						{
+							"name": "failed",
+							"originalRequest": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxfQ.yR5610T3yfnOGg3UxkKc1LGbB107pJHguUMwJvBNTOs",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{base_url}}/teams/10",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"teams",
+										"10"
+									]
+								}
+							},
+							"status": "Internal Server Error",
+							"code": 500,
+							"_postman_previewlanguage": null,
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Date",
+									"value": "Sun, 19 Oct 2025 11:33:22 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "81"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"meta\": {\n        \"message\": \"Delete team failed\",\n        \"code\": 500,\n        \"status\": \"error\"\n    },\n    \"data\": null\n}"
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Player",
+			"item": [
+				{
+					"name": "Get All Players",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/players",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"players"
+							]
+						},
+						"description": "menampilkan semua player"
+					},
+					"response": [
+						{
+							"name": "success",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "/players",
+									"path": [
+										"players"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": null,
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Date",
+									"value": "Sun, 19 Oct 2025 11:35:04 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "693"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"meta\": {\n        \"message\": \"List of players\",\n        \"code\": 200,\n        \"status\": \"success\"\n    },\n    \"data\": [\n        {\n            \"id\": 1,\n            \"name\": \"Rizky Hadi\",\n            \"height\": 178,\n            \"weight\": 72,\n            \"position\": \"Penyerang\",\n            \"number\": 9,\n            \"team_id\": 1\n        },\n        {\n            \"id\": 2,\n            \"name\": \"Dimas Putra\",\n            \"height\": 180,\n            \"weight\": 75,\n            \"position\": \"Gelandang\",\n            \"number\": 10,\n            \"team_id\": 1\n        },\n        {\n            \"id\": 3,\n            \"name\": \"Andri Saputra\",\n            \"height\": 185,\n            \"weight\": 80,\n            \"position\": \"Penjaga Gawang\",\n            \"number\": 1,\n            \"team_id\": 1\n        },\n        {\n            \"id\": 4,\n            \"name\": \"Budi Santoso\",\n            \"height\": 177,\n            \"weight\": 70,\n            \"position\": \"Bertahan\",\n            \"number\": 5,\n            \"team_id\": 2\n        },\n        {\n            \"id\": 5,\n            \"name\": \"Yoga Prasetyo\",\n            \"height\": 174,\n            \"weight\": 68,\n            \"position\": \"Gelandang\",\n            \"number\": 8,\n            \"team_id\": 2\n        },\n        {\n            \"id\": 6,\n            \"name\": \"Ahmad Fadli\",\n            \"height\": 182,\n            \"weight\": 78,\n            \"position\": \"Penyerang\",\n            \"number\": 11,\n            \"team_id\": 2\n        }\n    ]\n}"
+						}
+					]
+				},
+				{
+					"name": "Get Player By Team",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/players/team/1",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"players",
+								"team",
+								"1"
+							]
+						},
+						"description": "menampilkan semua player yang ada di Tim berdasarkan :id yang dimasukan lewat params"
+					},
+					"response": [
+						{
+							"name": "success",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "/players/team/1",
+									"path": [
+										"players",
+										"team",
+										"1"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": null,
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Date",
+									"value": "Sun, 19 Oct 2025 11:35:15 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "387"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"meta\": {\n        \"message\": \"Players by team\",\n        \"code\": 200,\n        \"status\": \"success\"\n    },\n    \"data\": [\n        {\n            \"id\": 1,\n            \"name\": \"Rizky Hadi\",\n            \"height\": 178,\n            \"weight\": 72,\n            \"position\": \"Penyerang\",\n            \"number\": 9,\n            \"team_id\": 1\n        },\n        {\n            \"id\": 2,\n            \"name\": \"Dimas Putra\",\n            \"height\": 180,\n            \"weight\": 75,\n            \"position\": \"Gelandang\",\n            \"number\": 10,\n            \"team_id\": 1\n        },\n        {\n            \"id\": 3,\n            \"name\": \"Andri Saputra\",\n            \"height\": 185,\n            \"weight\": 80,\n            \"position\": \"Penjaga Gawang\",\n            \"number\": 1,\n            \"team_id\": 1\n        }\n    ]\n}"
+						}
+					]
+				},
+				{
+					"name": "Get Detail Player",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/players/1",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"players",
+								"1"
+							]
+						},
+						"description": "menampilkan detail player berdasarkan :id melalui params"
+					},
+					"response": [
+						{
+							"name": "success",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "/players/1",
+									"path": [
+										"players",
+										"1"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": null,
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Date",
+									"value": "Sun, 19 Oct 2025 11:36:03 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "173"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"meta\": {\n        \"message\": \"Player detail\",\n        \"code\": 200,\n        \"status\": \"success\"\n    },\n    \"data\": {\n        \"id\": 1,\n        \"name\": \"Rizky Hadi\",\n        \"height\": 178,\n        \"weight\": 72,\n        \"position\": \"Penyerang\",\n        \"number\": 9,\n        \"team_id\": 1\n    }\n}"
+						},
+						{
+							"name": "failed",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/players/100",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"players",
+										"100"
+									]
+								}
+							},
+							"status": "Not Found",
+							"code": 404,
+							"_postman_previewlanguage": null,
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Date",
+									"value": "Sun, 19 Oct 2025 11:36:26 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "93"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"meta\": {\n        \"message\": \"Player not found\",\n        \"code\": 404,\n        \"status\": \"error\"\n    },\n    \"data\": \"record not found\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Create Player",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxfQ.yR5610T3yfnOGg3UxkKc1LGbB107pJHguUMwJvBNTOs",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"name\": \"Rendra Pratama\",\r\n  \"height\": 179,\r\n  \"weight\": 74,\r\n  \"position\": \"Penyerang\",\r\n  \"number\": 7,\r\n  \"team_id\": 1\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/players",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"players"
+							]
+						},
+						"description": "membuat player pada salah satu team yang dimasukan lewat body"
+					},
+					"response": [
+						{
+							"name": "success",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxfQ.yR5610T3yfnOGg3UxkKc1LGbB107pJHguUMwJvBNTOs",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"name\": \"Rendra Pratama\",\r\n  \"height\": 179,\r\n  \"weight\": 74,\r\n  \"position\": \"Penyerang\",\r\n  \"number\": 7,\r\n  \"team_id\": 1\r\n}\r\n",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "/players",
+									"path": [
+										"players"
+									]
+								}
+							},
+							"status": "Created",
+							"code": 201,
+							"_postman_previewlanguage": null,
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Date",
+									"value": "Sun, 19 Oct 2025 11:36:59 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "191"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"meta\": {\n        \"message\": \"Player created successfully\",\n        \"code\": 201,\n        \"status\": \"success\"\n    },\n    \"data\": {\n        \"id\": 7,\n        \"name\": \"Rendra Pratama\",\n        \"height\": 179,\n        \"weight\": 74,\n        \"position\": \"Penyerang\",\n        \"number\": 7,\n        \"team_id\": 1\n    }\n}"
+						},
+						{
+							"name": "failed",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxfQ.yR5610T3yfnOGg3UxkKc1LGbB107pJHguUMwJvBNTOs",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"name\": \"Rendra Pratama\",\r\n  \"height\": 179,\r\n  \"weight\": 74,\r\n  \"position\": \"Penyerang\",\r\n  \"number\": 7,\r\n  \"team_id\": 1\r\n}\r\n",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/players",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"players"
+									]
+								}
+							},
+							"status": "Internal Server Error",
+							"code": 500,
+							"_postman_previewlanguage": null,
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Date",
+									"value": "Sun, 19 Oct 2025 11:37:09 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "142"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"meta\": {\n        \"message\": \"Failed to create player\",\n        \"code\": 500,\n        \"status\": \"error\"\n    },\n    \"data\": \"nomor punggung sudah digunakan oleh pemain lain di tim ini\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Update Player",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxfQ.yR5610T3yfnOGg3UxkKc1LGbB107pJHguUMwJvBNTOs",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"name\": \"Rendra Pratama\",\r\n  \"height\": 181,\r\n  \"weight\": 76,\r\n  \"position\": \"Gelandang\",\r\n  \"number\": 7,\r\n  \"team_id\": 2\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/players/7",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"players",
+								"7"
+							]
+						},
+						"description": "merubah data player sesuai dengan :id yang dimasukan lewat params"
+					},
+					"response": [
+						{
+							"name": "failed",
+							"originalRequest": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxfQ.yR5610T3yfnOGg3UxkKc1LGbB107pJHguUMwJvBNTOs",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"name\": \"Rendra Pratama\",\r\n  \"height\": 181,\r\n  \"weight\": 76,\r\n  \"position\": \"Gelandang\",\r\n  \"number\": 1,\r\n  \"team_id\": 2\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "/players/7",
+									"path": [
+										"players",
+										"7"
+									]
+								}
+							},
+							"status": "Internal Server Error",
+							"code": 500,
+							"_postman_previewlanguage": null,
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Date",
+									"value": "Sun, 19 Oct 2025 11:37:25 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "142"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"meta\": {\n        \"message\": \"Failed to update player\",\n        \"code\": 500,\n        \"status\": \"error\"\n    },\n    \"data\": \"nomor punggung sudah digunakan oleh pemain lain di tim ini\"\n}"
+						},
+						{
+							"name": "success",
+							"originalRequest": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxfQ.yR5610T3yfnOGg3UxkKc1LGbB107pJHguUMwJvBNTOs",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"name\": \"Rendra Pratama\",\r\n  \"height\": 181,\r\n  \"weight\": 76,\r\n  \"position\": \"Gelandang\",\r\n  \"number\": 7,\r\n  \"team_id\": 2\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/players/7",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"players",
+										"7"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": null,
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Date",
+									"value": "Sun, 19 Oct 2025 11:38:19 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "191"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"meta\": {\n        \"message\": \"Player updated successfully\",\n        \"code\": 200,\n        \"status\": \"success\"\n    },\n    \"data\": {\n        \"id\": 7,\n        \"name\": \"Rendra Pratama\",\n        \"height\": 181,\n        \"weight\": 76,\n        \"position\": \"Gelandang\",\n        \"number\": 7,\n        \"team_id\": 2\n    }\n}"
+						}
+					]
+				},
+				{
+					"name": "Delete Pemain",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxfQ.yR5610T3yfnOGg3UxkKc1LGbB107pJHguUMwJvBNTOs",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"name\": \"Rendra Pratama\",\r\n  \"height\": 181,\r\n  \"weight\": 76,\r\n  \"position\": \"Gelandang\",\r\n  \"number\": 8,\r\n  \"team_id\": 2\r\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/players/7",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"players",
+								"7"
+							]
+						},
+						"description": "menghapus player berdasarkan :id yang dimasukan lewat params"
+					},
+					"response": [
+						{
+							"name": "success",
+							"originalRequest": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxfQ.yR5610T3yfnOGg3UxkKc1LGbB107pJHguUMwJvBNTOs",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"name\": \"Rendra Pratama\",\r\n  \"height\": 181,\r\n  \"weight\": 76,\r\n  \"position\": \"Gelandang\",\r\n  \"number\": 8,\r\n  \"team_id\": 2\r\n}"
+								},
+								"url": {
+									"raw": "/players/7",
+									"path": [
+										"players",
+										"7"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": null,
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Date",
+									"value": "Sun, 19 Oct 2025 11:38:48 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "92"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"meta\": {\n        \"message\": \"Player deleted successfully\",\n        \"code\": 200,\n        \"status\": \"success\"\n    },\n    \"data\": null\n}"
+						},
+						{
+							"name": "failed",
+							"originalRequest": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxfQ.yR5610T3yfnOGg3UxkKc1LGbB107pJHguUMwJvBNTOs",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"name\": \"Rendra Pratama\",\r\n  \"height\": 181,\r\n  \"weight\": 76,\r\n  \"position\": \"Gelandang\",\r\n  \"number\": 8,\r\n  \"team_id\": 2\r\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/players/7",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"players",
+										"7"
+									]
+								}
+							},
+							"status": "Internal Server Error",
+							"code": 500,
+							"_postman_previewlanguage": null,
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Date",
+									"value": "Sun, 19 Oct 2025 11:38:57 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "100"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"meta\": {\n        \"message\": \"Failed to delete player\",\n        \"code\": 500,\n        \"status\": \"error\"\n    },\n    \"data\": \"record not found\"\n}"
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Match",
+			"item": [
+				{
+					"name": "Get All Match",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/matches",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"matches"
+							]
+						},
+						"description": "menampilkan semua data match"
+					},
+					"response": [
+						{
+							"name": "success",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "/matches",
+									"path": [
+										"matches"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": null,
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Date",
+									"value": "Sun, 19 Oct 2025 12:08:52 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "687"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"meta\": {\n        \"message\": \"List of matches\",\n        \"code\": 200,\n        \"status\": \"success\"\n    },\n    \"data\": [\n        {\n            \"id\": 1,\n            \"date\": \"2025-10-20\",\n            \"time\": \"15:00\",\n            \"home_team\": {\n                \"id\": 1,\n                \"name\": \"Indonesia FC\"\n            },\n            \"away_team\": {\n                \"id\": 2,\n                \"name\": \"Pahlawan FC\"\n            }\n        },\n        {\n            \"id\": 4,\n            \"date\": \"2025-10-22\",\n            \"time\": \"18:30\",\n            \"home_team\": {\n                \"id\": 0,\n                \"name\": \"\"\n            },\n            \"away_team\": {\n                \"id\": 0,\n                \"name\": \"\"\n            }\n        },\n        {\n            \"id\": 6,\n            \"date\": \"2025-10-20\",\n            \"time\": \"18:30\",\n            \"home_team\": {\n                \"id\": 1,\n                \"name\": \"Indonesia FC\"\n            },\n            \"away_team\": {\n                \"id\": 2,\n                \"name\": \"Pahlawan FC\"\n            }\n        },\n        {\n            \"id\": 7,\n            \"date\": \"2025-10-29\",\n            \"time\": \"18:30\",\n            \"home_team\": {\n                \"id\": 2,\n                \"name\": \"Pahlawan FC\"\n            },\n            \"away_team\": {\n                \"id\": 1,\n                \"name\": \"Indonesia FC\"\n            }\n        },\n        {\n            \"id\": 8,\n            \"date\": \"2025-10-25\",\n            \"time\": \"20:00\",\n            \"home_team\": {\n                \"id\": 2,\n                \"name\": \"Pahlawan FC\"\n            },\n            \"away_team\": {\n                \"id\": 0,\n                \"name\": \"\"\n            }\n        }\n    ]\n}"
+						}
+					]
+				},
+				{
+					"name": "Get Match By ID",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxfQ.yR5610T3yfnOGg3UxkKc1LGbB107pJHguUMwJvBNTOs",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"name\": \"Rendra Pratama\",\r\n  \"height\": 181,\r\n  \"weight\": 76,\r\n  \"position\": \"Gelandang\",\r\n  \"number\": 8,\r\n  \"team_id\": 2\r\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/matches/1",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"matches",
+								"1"
+							]
+						},
+						"description": "menampilkan match berdasarkan :id yang dimasukan melalui params"
+					},
+					"response": [
+						{
+							"name": "success",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxfQ.yR5610T3yfnOGg3UxkKc1LGbB107pJHguUMwJvBNTOs",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"name\": \"Rendra Pratama\",\r\n  \"height\": 181,\r\n  \"weight\": 76,\r\n  \"position\": \"Gelandang\",\r\n  \"number\": 8,\r\n  \"team_id\": 2\r\n}"
+								},
+								"url": {
+									"raw": "/matches/1",
+									"path": [
+										"matches",
+										"1"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": null,
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Date",
+									"value": "Sun, 19 Oct 2025 11:39:21 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "201"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"meta\": {\n        \"message\": \"Match detail\",\n        \"code\": 200,\n        \"status\": \"success\"\n    },\n    \"data\": {\n        \"id\": 1,\n        \"date\": \"2025-10-20\",\n        \"time\": \"15:00\",\n        \"home_team\": {\n            \"id\": 1,\n            \"name\": \"Indonesia FC\"\n        },\n        \"away_team\": {\n            \"id\": 2,\n            \"name\": \"Pahlawan FC\"\n        }\n    }\n}"
+						},
+						{
+							"name": "failed",
+							"originalRequest": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxfQ.yR5610T3yfnOGg3UxkKc1LGbB107pJHguUMwJvBNTOs",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"name\": \"Rendra Pratama\",\r\n  \"height\": 181,\r\n  \"weight\": 76,\r\n  \"position\": \"Gelandang\",\r\n  \"number\": 8,\r\n  \"team_id\": 2\r\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/matches/100",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"matches",
+										"100"
+									]
+								}
+							},
+							"status": "Not Found",
+							"code": 404,
+							"_postman_previewlanguage": null,
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Date",
+									"value": "Sun, 19 Oct 2025 11:39:33 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "78"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"meta\": {\n        \"message\": \"Match not found\",\n        \"code\": 404,\n        \"status\": \"error\"\n    },\n    \"data\": null\n}"
+						}
+					]
+				},
+				{
+					"name": "Create Match",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxfQ.yR5610T3yfnOGg3UxkKc1LGbB107pJHguUMwJvBNTOs",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"date\": \"2025-10-20\",\r\n  \"time\": \"18:30\",\r\n  \"home_team_id\": 1,\r\n  \"away_team_id\": 2\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/matches",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"matches"
+							]
+						},
+						"description": "membuat match"
+					},
+					"response": [
+						{
+							"name": "failed",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxfQ.yR5610T3yfnOGg3UxkKc1LGbB107pJHguUMwJvBNTOs",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"date\": \"2025-10-20\",\r\n  \"time\": \"18:30\",\r\n  \"home_team_id\": 1,\r\n  \"away_team_id\": 2\r\n}\r\n",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "/matches",
+									"path": [
+										"matches"
+									]
+								}
+							},
+							"status": "Bad Request",
+							"code": 400,
+							"_postman_previewlanguage": null,
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Date",
+									"value": "Sun, 19 Oct 2025 11:39:57 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "149"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"meta\": {\n        \"message\": \"Failed to create match\",\n        \"code\": 400,\n        \"status\": \"error\"\n    },\n    \"data\": \"pertandingan dengan jadwal, jam, dan tim yang sama sudah terdaftar\"\n}"
+						},
+						{
+							"name": "success",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxfQ.yR5610T3yfnOGg3UxkKc1LGbB107pJHguUMwJvBNTOs",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"date\": \"2025-10-29\",\r\n  \"time\": \"18:30\",\r\n  \"home_team_id\": 2,\r\n  \"away_team_id\": 1\r\n}\r\n",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/matches",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"matches"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": null,
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Date",
+									"value": "Sun, 19 Oct 2025 11:40:17 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "192"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"meta\": {\n        \"message\": \"Match created successfully\",\n        \"code\": 200,\n        \"status\": \"success\"\n    },\n    \"data\": {\n        \"id\": 7,\n        \"date\": \"2025-10-29\",\n        \"time\": \"18:30\",\n        \"home_team\": {\n            \"id\": 0,\n            \"name\": \"\"\n        },\n        \"away_team\": {\n            \"id\": 0,\n            \"name\": \"\"\n        }\n    }\n}"
+						}
+					]
+				},
+				{
+					"name": "Update Match",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxfQ.yR5610T3yfnOGg3UxkKc1LGbB107pJHguUMwJvBNTOs",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"date\": \"2025-10-20\",\r\n  \"time\": \"20:30\",\r\n  \"home_team_id\": 1,\r\n  \"away_team_id\": 2\r\n}\r\n"
+						},
+						"url": {
+							"raw": "{{base_url}}/matches/5",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"matches",
+								"5"
+							]
+						},
+						"description": "update match berdasarkan :id pertandingan yang dimasukan lewat params"
+					},
+					"response": [
+						{
+							"name": "success",
+							"originalRequest": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxfQ.yR5610T3yfnOGg3UxkKc1LGbB107pJHguUMwJvBNTOs",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"date\": \"2025-10-20\",\r\n  \"time\": \"20:30\",\r\n  \"home_team_id\": 1,\r\n  \"away_team_id\": 2\r\n}\r\n"
+								},
+								"url": {
+									"raw": "/matches/5",
+									"path": [
+										"matches",
+										"5"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": null,
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Date",
+									"value": "Sun, 19 Oct 2025 11:40:38 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "203"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"meta\": {\n        \"message\": \"Match updated successfully\",\n        \"code\": 200,\n        \"status\": \"success\"\n    },\n    \"data\": {\n        \"id\": 5,\n        \"date\": \"2025-10-20\",\n        \"time\": \"20:30\",\n        \"home_team\": {\n            \"id\": 2,\n            \"name\": \"Pahlawan FC\"\n        },\n        \"away_team\": {\n            \"id\": 0,\n            \"name\": \"\"\n        }\n    }\n}"
+						}
+					]
+				},
+				{
+					"name": "Delete Match",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxfQ.yR5610T3yfnOGg3UxkKc1LGbB107pJHguUMwJvBNTOs",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"date\": \"2025-10-20\",\r\n  \"time\": \"20:30\",\r\n  \"home_team_id\": 1,\r\n  \"away_team_id\": 2\r\n}\r\n"
+						},
+						"url": {
+							"raw": "{{base_url}}/matches/5",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"matches",
+								"5"
+							]
+						},
+						"description": "menghapus match berdasarkan :id pertandingan yang dimasukan lewat params"
+					},
+					"response": [
+						{
+							"name": "success",
+							"originalRequest": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxfQ.yR5610T3yfnOGg3UxkKc1LGbB107pJHguUMwJvBNTOs",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"date\": \"2025-10-20\",\r\n  \"time\": \"20:30\",\r\n  \"home_team_id\": 1,\r\n  \"away_team_id\": 2\r\n}\r\n"
+								},
+								"url": {
+									"raw": "/matches/5",
+									"path": [
+										"matches",
+										"5"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": null,
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Date",
+									"value": "Sun, 19 Oct 2025 11:40:53 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "91"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"meta\": {\n        \"message\": \"Match deleted successfully\",\n        \"code\": 200,\n        \"status\": \"success\"\n    },\n    \"data\": null\n}"
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "MatchResult",
+			"item": [
+				{
+					"name": "Get All Match Result",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/match_results",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"match_results"
+							]
+						},
+						"description": "menampilkan semua hasil pada pertandingan"
+					},
+					"response": [
+						{
+							"name": "success",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "/match_results",
+									"path": [
+										"match_results"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": null,
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Date",
+									"value": "Sun, 19 Oct 2025 12:11:29 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "661"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"meta\": {\n        \"message\": \"List of match results\",\n        \"code\": 200,\n        \"status\": \"success\"\n    },\n    \"data\": [\n        {\n            \"id\": 1,\n            \"match_id\": 1,\n            \"home_score\": 2,\n            \"away_score\": 1,\n            \"status\": \"Home Menang\",\n            \"goals\": [\n                {\n                    \"player_id\": 1,\n                    \"player_name\": \"Rizky Hadi\",\n                    \"team_id\": 1,\n                    \"minute\": 15\n                },\n                {\n                    \"player_id\": 2,\n                    \"player_name\": \"Dimas Putra\",\n                    \"team_id\": 1,\n                    \"minute\": 60\n                },\n                {\n                    \"player_id\": 4,\n                    \"player_name\": \"Budi Santoso\",\n                    \"team_id\": 2,\n                    \"minute\": 75\n                }\n            ]\n        },\n        {\n            \"id\": 2,\n            \"match_id\": 6,\n            \"home_score\": 2,\n            \"away_score\": 1,\n            \"status\": \"Home Menang\",\n            \"goals\": [\n                {\n                    \"player_id\": 1,\n                    \"player_name\": \"Rizky Hadi\",\n                    \"team_id\": 1,\n                    \"minute\": 10\n                },\n                {\n                    \"player_id\": 2,\n                    \"player_name\": \"Dimas Putra\",\n                    \"team_id\": 1,\n                    \"minute\": 35\n                },\n                {\n                    \"player_id\": 4,\n                    \"player_name\": \"Budi Santoso\",\n                    \"team_id\": 2,\n                    \"minute\": 55\n                }\n            ]\n        }\n    ]\n}"
+						}
+					]
+				},
+				{
+					"name": "Get Match Result By ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/match_results/1",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"match_results",
+								"1"
+							]
+						},
+						"description": "menampilkan hasil match berdasarkan :id pertandingan yang dimasukan lewat params"
+					},
+					"response": [
+						{
+							"name": "success",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "/match_results/1",
+									"path": [
+										"match_results",
+										"1"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": null,
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Date",
+									"value": "Sun, 19 Oct 2025 12:12:14 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "368"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"meta\": {\n        \"message\": \"Match result detail\",\n        \"code\": 200,\n        \"status\": \"success\"\n    },\n    \"data\": {\n        \"id\": 1,\n        \"match_id\": 1,\n        \"home_score\": 2,\n        \"away_score\": 1,\n        \"status\": \"Home Menang\",\n        \"goals\": [\n            {\n                \"player_id\": 1,\n                \"player_name\": \"Rizky Hadi\",\n                \"team_id\": 1,\n                \"minute\": 15\n            },\n            {\n                \"player_id\": 2,\n                \"player_name\": \"Dimas Putra\",\n                \"team_id\": 1,\n                \"minute\": 60\n            },\n            {\n                \"player_id\": 4,\n                \"player_name\": \"Budi Santoso\",\n                \"team_id\": 2,\n                \"minute\": 75\n            }\n        ]\n    }\n}"
+						}
+					]
+				},
+				{
+					"name": "Create Match Result",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxfQ.yR5610T3yfnOGg3UxkKc1LGbB107pJHguUMwJvBNTOs",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"match_id\": 6,\r\n  \"home_score\": 2,\r\n  \"away_score\": 1,\r\n  \"status\": \"Home Menang\",\r\n  \"goals\": [\r\n    {\"player_id\": 1, \"team_id\": 1, \"minute\": 10},\r\n    {\"player_id\": 2, \"team_id\": 1, \"minute\": 35},\r\n    {\"player_id\": 4, \"team_id\": 2, \"minute\": 55}\r\n  ]\r\n}\r\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/match_results",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"match_results"
+							]
+						},
+						"description": "membuat hasil result pada match berdasarkan :id pertandingan yang dimasukan lewat params"
+					},
+					"response": [
+						{
+							"name": "success",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxfQ.yR5610T3yfnOGg3UxkKc1LGbB107pJHguUMwJvBNTOs",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"match_id\": 6,\r\n  \"home_score\": 2,\r\n  \"away_score\": 1,\r\n  \"status\": \"Home Menang\",\r\n  \"goals\": [\r\n    {\"player_id\": 1, \"team_id\": 1, \"minute\": 10},\r\n    {\"player_id\": 2, \"team_id\": 1, \"minute\": 35},\r\n    {\"player_id\": 4, \"team_id\": 2, \"minute\": 55}\r\n  ]\r\n}\r\n",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "/match_results",
+									"path": [
+										"match_results"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": null,
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Date",
+									"value": "Sun, 19 Oct 2025 11:48:11 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "369"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"meta\": {\n        \"message\": \"Match result created\",\n        \"code\": 200,\n        \"status\": \"success\"\n    },\n    \"data\": {\n        \"id\": 2,\n        \"match_id\": 6,\n        \"home_score\": 2,\n        \"away_score\": 1,\n        \"status\": \"Home Menang\",\n        \"goals\": [\n            {\n                \"player_id\": 1,\n                \"player_name\": \"Rizky Hadi\",\n                \"team_id\": 1,\n                \"minute\": 10\n            },\n            {\n                \"player_id\": 2,\n                \"player_name\": \"Dimas Putra\",\n                \"team_id\": 1,\n                \"minute\": 35\n            },\n            {\n                \"player_id\": 4,\n                \"player_name\": \"Budi Santoso\",\n                \"team_id\": 2,\n                \"minute\": 55\n            }\n        ]\n    }\n}"
+						},
+						{
+							"name": "failed",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxfQ.yR5610T3yfnOGg3UxkKc1LGbB107pJHguUMwJvBNTOs",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"match_id\": 6,\r\n  \"home_score\": 2,\r\n  \"away_score\": 1,\r\n  \"status\": \"Home Menang\",\r\n  \"goals\": [\r\n    {\"player_id\": 1, \"team_id\": 1, \"minute\": 10},\r\n    {\"player_id\": 2, \"team_id\": 1, \"minute\": 35},\r\n    {\"player_id\": 4, \"team_id\": 2, \"minute\": 55}\r\n  ]\r\n}\r\n",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/match_results",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"match_results"
+									]
+								}
+							},
+							"status": "Bad Request",
+							"code": 400,
+							"_postman_previewlanguage": null,
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Date",
+									"value": "Sun, 19 Oct 2025 11:48:27 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "132"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"meta\": {\n        \"message\": \"Failed to create match result\",\n        \"code\": 400,\n        \"status\": \"error\"\n    },\n    \"data\": \"match result for match ID 6 already exists\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Get Match Report",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/match_results/report",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"match_results",
+								"report"
+							]
+						},
+						"description": "Menampilkan hasil pertandingan beserta skor, goal, statistik, jadwal pertandingan"
+					},
+					"response": [
+						{
+							"name": "success",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "/match_results/report",
+									"path": [
+										"match_results",
+										"report"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": null,
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Date",
+									"value": "Sun, 19 Oct 2025 11:42:30 GMT"
+								},
+								{
+									"key": "Content-Length",
+									"value": "336"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"meta\": {\n        \"message\": \"Match results report\",\n        \"code\": 200,\n        \"status\": \"success\"\n    },\n    \"data\": [\n        {\n            \"match_id\": 1,\n            \"date\": \"2025-10-20\",\n            \"time\": \"15:00\",\n            \"home_team\": \"Indonesia FC\",\n            \"away_team\": \"Pahlawan FC\",\n            \"home_score\": 2,\n            \"away_score\": 1,\n            \"status\": \"Home Menang\",\n            \"top_scorers\": [\n                \"Dimas Putra\",\n                \"Budi Santoso\",\n                \"Rizky Hadi\"\n            ],\n            \"home_total_wins\": 1,\n            \"away_total_wins\": 0\n        }\n    ]\n}"
+						}
+					]
+				}
+			]
+		}
+	]
+}
