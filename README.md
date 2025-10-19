@@ -20,6 +20,7 @@ Proyek ini mendukung manajemen admin, laporan pertandingan, dan dilengkapi seede
 ```bash
 git clone
 cd footballteam
+```
 
 2. Install dependency:
 ```bash
