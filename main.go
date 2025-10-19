@@ -10,6 +10,7 @@ import (
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 
+	"footballteam/auth"
 	"footballteam/handler"
 	"footballteam/team"
 	"footballteam/user"
@@ -37,10 +38,12 @@ func main() {
 	// Jalankan seeder admin
 	seedAdminUser(db)
 	seedTeams(db)
+	
+	authService := auth.NewService()
 
 	userRepository := user.NewRepository(db)
 	userService := user.NewService(userRepository) 
-	userHandler := handler.NewUserHandler(userService)
+	userHandler := handler.NewUserHandler(userService, authService)
 
 	teamRepository := team.NewRepository(db)
 	teamService := team.NewService(teamRepository)
