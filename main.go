@@ -16,6 +16,7 @@ import (
 	"footballteam/auth"
 	"footballteam/handler"
 	"footballteam/helper"
+	"footballteam/match"
 	"footballteam/player"
 	"footballteam/team"
 	"footballteam/user"
@@ -35,6 +36,7 @@ func main() {
 		&user.User{},
 		&team.Team{},
 		&player.Player{},
+		&match.Match{},
 	)
 	if err != nil {
 		log.Fatal("❌ Failed to migrate:", err)
@@ -45,6 +47,7 @@ func main() {
 	seedAdminUser(db)
 	seedTeams(db)
 	seedPlayers(db)
+	seedMatch(db)
 	
 	authService := auth.NewService()
 
@@ -59,6 +62,10 @@ func main() {
 	playerRepository := player.NewRepository(db)
 	playerService := player.NewService(playerRepository)
 	playerHandler := handler.NewPlayerHandler(playerService)
+
+	matchRepository := match.NewRepository(db)
+	matchService := match.NewService(matchRepository)
+	matchHandler := handler.NewMatchHandler(matchService)
 
 
 	router := gin.Default()
@@ -75,6 +82,10 @@ func main() {
     api.GET("/players/:id", playerHandler.GetPlayerByID)
     api.GET("/players/team/:team_id", playerHandler.GetPlayersByTeam)
 
+	// Match
+	api.GET("/matches", matchHandler.GetMatches)
+	api.GET("/matches/:id", matchHandler.GetMatchByID)
+
 	// Protected routes (only admin)
 	protected := api.Group("/")
 	protected.Use(authMiddleware(authService, userService))
@@ -89,6 +100,11 @@ func main() {
     protected.POST("/players", playerHandler.CreatePlayer)
     protected.PUT("/players/:id", playerHandler.UpdatePlayer)
     protected.DELETE("/players/:id", playerHandler.DeletePlayer)
+
+	// Match
+	protected.POST("/matches", matchHandler.CreateMatch)
+	protected.PUT("/matches/:id", matchHandler.UpdateMatch)
+	protected.DELETE("/matches/:id", matchHandler.DeleteMatch)
 
 	api.Static("/uploads", "./uploads")
 
@@ -303,4 +319,45 @@ func seedPlayers(db *gorm.DB) {
 	}
 
 	fmt.Println("✅ Seeded 6 default players successfully")
+}
+
+func seedMatch(db *gorm.DB) {
+	matches := []match.Match{
+		{
+			Date:       "2025-10-20",
+			Time:       "15:00",
+			HomeTeamID: 1,
+			AwayTeamID: 2,
+			CreatedAt:  time.Now(),
+			UpdatedAt:  time.Now(),
+		},
+		{
+			Date:       "2025-10-22",
+			Time:       "18:30",
+			HomeTeamID: 3,
+			AwayTeamID: 4,
+			CreatedAt:  time.Now(),
+			UpdatedAt:  time.Now(),
+		},
+		{
+			Date:       "2025-10-25",
+			Time:       "20:00",
+			HomeTeamID: 2,
+			AwayTeamID: 3,
+			CreatedAt:  time.Now(),
+			UpdatedAt:  time.Now(),
+		},
+	}
+
+	for _, m := range matches {
+		var existing match.Match
+		err := db.Where("date = ? AND time = ? AND home_team_id = ? AND away_team_id = ?", m.Date, m.Time, m.HomeTeamID, m.AwayTeamID).First(&existing).Error
+		if err == gorm.ErrRecordNotFound {
+			if err := db.Create(&m).Error; err != nil {
+				log.Printf("❌ Gagal menambahkan match: %+v, error: %v", m, err)
+			} else {
+				log.Printf("✅ Berhasil menambahkan match: %+v", m)
+			}
+		}
+	}
 }
