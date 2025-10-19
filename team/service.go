@@ -1,6 +1,9 @@
 package team
 
-import "fmt"
+import (
+	"fmt"
+	"time"
+)
 
 type Service interface {
 	GetAllTeams() ([]Team, error)
@@ -28,16 +31,31 @@ func (s *service) GetTeamByID(id int) (Team, error) {
 }
 
 func (s *service) CreateTeam(input CreateTeamInput) (Team, error) {
+	// Cek apakah nama tim sudah ada
+	existing, err := s.repository.FindByName(input.Name)
+	if err == nil {
+		return existing, fmt.Errorf("team with name '%s' already exists", input.Name)
+	}
+
 	team := Team{
 		Name:        input.Name,
 		YearFounded: input.YearFounded,
 		Address:     input.Address,
 		City:        input.City,
+		CreatedAt:   time.Now(),
+		UpdatedAt:   time.Now(),
 	}
+
 	return s.repository.Create(team)
 }
 
 func (s *service) UpdateTeam(id int, input UpdateTeamInput) (Team, error) {
+	// Cek apakah nama tim sudah ada
+	existing, err := s.repository.FindByName(input.Name)
+	if err == nil {
+		return existing, fmt.Errorf("team with name '%s' already exists", input.Name)
+	}
+	
 	team, err := s.repository.FindByID(id)
 	if err != nil {
 		return team, err

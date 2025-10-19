@@ -76,7 +76,13 @@ func (h *teamHandler) CreateTeam(c *gin.Context) {
 // PUT /api/teams/:id
 func (h *teamHandler) UpdateTeam(c *gin.Context) {
 	idParam := c.Param("id")
-	id, _ := strconv.Atoi(idParam)
+	id, err := strconv.Atoi(idParam)
+	
+	if err != nil {
+    	response := helper.APIResponse("Invalid team ID", http.StatusBadRequest, "error", nil)
+    	c.JSON(http.StatusBadRequest, response)
+    	return
+	}
 
 	var input team.UpdateTeamInput
 	if err := c.ShouldBindJSON(&input); err != nil {

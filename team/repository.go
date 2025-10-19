@@ -8,6 +8,7 @@ type Repository interface {
 	Create(team Team) (Team, error)
 	Update(team Team) (Team, error)
 	Delete(team Team) error
+	FindByName(name string) (Team, error)
 }
 
 type repository struct {
@@ -42,4 +43,10 @@ func (r *repository) Update(team Team) (Team, error) {
 
 func (r *repository) Delete(team Team) error {
 	return r.db.Delete(&team).Error
+}
+
+func (r *repository) FindByName(name string) (Team, error) {
+	var team Team
+	err := r.db.Where("name = ?", name).First(&team).Error
+	return team, err
 }

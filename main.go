@@ -17,6 +17,7 @@ import (
 	"footballteam/handler"
 	"footballteam/helper"
 	"footballteam/match"
+	"footballteam/match_result"
 	"footballteam/player"
 	"footballteam/team"
 	"footballteam/user"
@@ -37,6 +38,8 @@ func main() {
 		&team.Team{},
 		&player.Player{},
 		&match.Match{},
+		&match_result.MatchResult{},
+		&match_result.Goal{},
 	)
 	if err != nil {
 		log.Fatal("❌ Failed to migrate:", err)
@@ -48,6 +51,7 @@ func main() {
 	seedTeams(db)
 	seedPlayers(db)
 	seedMatch(db)
+	seedMatchResults(db)
 	
 	authService := auth.NewService()
 
@@ -67,24 +71,35 @@ func main() {
 	matchService := match.NewService(matchRepository)
 	matchHandler := handler.NewMatchHandler(matchService)
 
+	matchResultRepository := match_result.NewRepository(db)
+	matchResultService := match_result.NewService(matchResultRepository, playerService, matchService)
+	matchResultHandler := handler.NewMatchResultHandler(matchResultService, playerService)
+
+
 
 	router := gin.Default()
 	api := router.Group("/api/v1")
 
 	// Public routes
-	//Team
 	api.POST("/sessions", userHandler.Login)
+
+	// Teams
 	api.GET("/teams", teamHandler.GetTeams)
 	api.GET("/teams/:id", teamHandler.GetTeamByID)
 
-	// Player (tanpa login)
-    api.GET("/players", playerHandler.GetPlayers)
-    api.GET("/players/:id", playerHandler.GetPlayerByID)
-    api.GET("/players/team/:team_id", playerHandler.GetPlayersByTeam)
+	// Players
+	api.GET("/players", playerHandler.GetPlayers)
+	api.GET("/players/:id", playerHandler.GetPlayerByID)
+	api.GET("/players/team/:team_id", playerHandler.GetPlayersByTeam)
 
-	// Match
+	// Matches
 	api.GET("/matches", matchHandler.GetMatches)
 	api.GET("/matches/:id", matchHandler.GetMatchByID)
+
+	// MatchResults
+	api.GET("/match_results", matchResultHandler.GetMatchResults)
+	api.GET("/match_results/:id", matchResultHandler.GetMatchResultByID)
+	api.GET("/match_results/report", matchResultHandler.GetMatchResultsReport)
 
 	// Protected routes (only admin)
 	protected := api.Group("/")
@@ -96,19 +111,22 @@ func main() {
 	protected.DELETE("/teams/:id", teamHandler.DeleteTeam)
 	protected.POST("/teams/:id/logo", teamHandler.UploadLogo)
 
-	// Player (dengan login)
-    protected.POST("/players", playerHandler.CreatePlayer)
-    protected.PUT("/players/:id", playerHandler.UpdatePlayer)
-    protected.DELETE("/players/:id", playerHandler.DeletePlayer)
+	// Players
+	protected.POST("/players", playerHandler.CreatePlayer)
+	protected.PUT("/players/:id", playerHandler.UpdatePlayer)
+	protected.DELETE("/players/:id", playerHandler.DeletePlayer)
 
-	// Match
+	// Matches
 	protected.POST("/matches", matchHandler.CreateMatch)
 	protected.PUT("/matches/:id", matchHandler.UpdateMatch)
 	protected.DELETE("/matches/:id", matchHandler.DeleteMatch)
 
-	api.Static("/uploads", "./uploads")
+	// MatchResults
+	protected.POST("/match_results", matchResultHandler.CreateMatchResult)
 
+	api.Static("/uploads", "./uploads")
 	router.Run()
+
 	
 }
 
@@ -361,3 +379,55 @@ func seedMatch(db *gorm.DB) {
 		}
 	}
 }
+
+func seedMatchResults(db *gorm.DB) {
+	var count int64
+	db.Model(&match_result.MatchResult{}).Count(&count)
+	if count > 0 {
+		fmt.Println("MatchResults already exist, skipping seeder...")
+		return
+	}
+
+	results := []match_result.MatchResult{
+		{
+			MatchID:   1,
+			HomeScore: 2,
+			AwayScore: 1,
+			Status:    "Home Menang",
+			Goals: []match_result.Goal{
+				{
+					PlayerID: 1, // ID pemain yang mencetak gol
+					TeamID:   1, // Home team
+					Minute:   15,
+					CreatedAt: time.Now(),
+					UpdatedAt: time.Now(),
+				},
+				{
+					PlayerID: 2,
+					TeamID:   1,
+					Minute:   60,
+					CreatedAt: time.Now(),
+					UpdatedAt: time.Now(),
+				},
+				{
+					PlayerID: 4,
+					TeamID:   2, // Away team
+					Minute:   75,
+					CreatedAt: time.Now(),
+					UpdatedAt: time.Now(),
+				},
+			},
+			CreatedAt: time.Now(),
+			UpdatedAt: time.Now(),
+		},
+	}
+
+	if err := db.Create(&results).Error; err != nil {
+		log.Println("Failed to seed match results:", err)
+		return
+	}
+
+	fmt.Println("✅ Seeded match results with goals successfully")
+}
+
+
