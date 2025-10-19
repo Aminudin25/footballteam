@@ -16,6 +16,7 @@ import (
 	"footballteam/auth"
 	"footballteam/handler"
 	"footballteam/helper"
+	"footballteam/player"
 	"footballteam/team"
 	"footballteam/user"
 )
@@ -33,6 +34,7 @@ func main() {
 	err = db.AutoMigrate(
 		&user.User{},
 		&team.Team{},
+		&player.Player{},
 	)
 	if err != nil {
 		log.Fatal("❌ Failed to migrate:", err)
@@ -42,6 +44,7 @@ func main() {
 	// Jalankan seeder admin
 	seedAdminUser(db)
 	seedTeams(db)
+	seedPlayers(db)
 	
 	authService := auth.NewService()
 
@@ -53,17 +56,39 @@ func main() {
 	teamService := team.NewService(teamRepository)
 	teamHandler := handler.NewTeamHandler(teamService)
 
+	playerRepository := player.NewRepository(db)
+	playerService := player.NewService(playerRepository)
+	playerHandler := handler.NewPlayerHandler(playerService)
+
+
 	router := gin.Default()
 	api := router.Group("/api/v1")
 
+	// Public routes
+	//Team
 	api.POST("/sessions", userHandler.Login)
-
 	api.GET("/teams", teamHandler.GetTeams)
 	api.GET("/teams/:id", teamHandler.GetTeamByID)
-	api.POST("/teams", teamHandler.CreateTeam)
-	api.PUT("/teams/:id", teamHandler.UpdateTeam)
-	api.DELETE("/teams/:id", teamHandler.DeleteTeam)
-	api.POST("teams/:id/logo", authMiddleware(authService, userService) , teamHandler.UploadLogo)
+
+	// Player (tanpa login)
+    api.GET("/players", playerHandler.GetPlayers)
+    api.GET("/players/:id", playerHandler.GetPlayerByID)
+    api.GET("/players/team/:team_id", playerHandler.GetPlayersByTeam)
+
+	// Protected routes (only admin)
+	protected := api.Group("/")
+	protected.Use(authMiddleware(authService, userService))
+
+	// Teams
+	protected.POST("/teams", teamHandler.CreateTeam)
+	protected.PUT("/teams/:id", teamHandler.UpdateTeam)
+	protected.DELETE("/teams/:id", teamHandler.DeleteTeam)
+	protected.POST("/teams/:id/logo", teamHandler.UploadLogo)
+
+	// Player (dengan login)
+    protected.POST("/players", playerHandler.CreatePlayer)
+    protected.PUT("/players/:id", playerHandler.UpdatePlayer)
+    protected.DELETE("/players/:id", playerHandler.DeletePlayer)
 
 	api.Static("/uploads", "./uploads")
 
@@ -112,6 +137,8 @@ func authMiddleware(authService auth.Service, userService user.Service) gin.Hand
 		}
 
 		c.Set("currentUser", user)
+
+		c.Next()
 
 	}
 }
@@ -184,4 +211,96 @@ func seedTeams(db *gorm.DB) {
 	}
 
 	fmt.Println("✅ Seeded 2 default teams successfully")
+}
+
+func seedPlayers(db *gorm.DB) {
+	var count int64
+	db.Model(&player.Player{}).Count(&count)
+	if count > 0 {
+		fmt.Println("Players already exist, skipping seeder...")
+		return
+	}
+
+	var garudaFC, pahlawanFC team.Team
+	db.Where("name = ?", "Garuda FC").First(&garudaFC)
+	db.Where("name = ?", "Pahlawan FC").First(&pahlawanFC)
+
+	// Jika tim tidak ditemukan, skip
+	if garudaFC.ID == 0 || pahlawanFC.ID == 0 {
+		fmt.Println("❌ Teams not found, skipping player seeder.")
+		return
+	}
+
+	players := []player.Player{
+		// Garuda FC
+		{
+			Name:         "Rizky Hadi",
+			Height:       178,
+			Weight:       72,
+			Position:     "Penyerang",
+			Number:       9,
+			TeamID:       garudaFC.ID,
+			CreatedAt:    time.Now(),
+			UpdatedAt:    time.Now(),
+		},
+		{
+			Name:         "Dimas Putra",
+			Height:       180,
+			Weight:       75,
+			Position:     "Gelandang",
+			Number:       10,
+			TeamID:       garudaFC.ID,
+			CreatedAt:    time.Now(),
+			UpdatedAt:    time.Now(),
+		},
+		{
+			Name:         "Andri Saputra",
+			Height:       185,
+			Weight:       80,
+			Position:     "Penjaga Gawang",
+			Number:       1,
+			TeamID:       garudaFC.ID,
+			CreatedAt:    time.Now(),
+			UpdatedAt:    time.Now(),
+		},
+
+		// Pahlawan FC
+		{
+			Name:         "Budi Santoso",
+			Height:       177,
+			Weight:       70,
+			Position:     "Bertahan",
+			Number:       5,
+			TeamID:       pahlawanFC.ID,
+			CreatedAt:    time.Now(),
+			UpdatedAt:    time.Now(),
+		},
+		{
+			Name:         "Yoga Prasetyo",
+			Height:       174,
+			Weight:       68,
+			Position:     "Gelandang",
+			Number:       8,
+			TeamID:       pahlawanFC.ID,
+			CreatedAt:    time.Now(),
+			UpdatedAt:    time.Now(),
+		},
+		{
+			Name:         "Ahmad Fadli",
+			Height:       182,
+			Weight:       78,
+			Position:     "Penyerang",
+			Number:       11,
+			TeamID:       pahlawanFC.ID,
+			CreatedAt:    time.Now(),
+			UpdatedAt:    time.Now(),
+		},
+	}
+
+	if err := db.Create(&players).Error; err != nil {
+		log.Println("❌ Failed to seed players:", err)
+		return
+	}
+
+	fmt.Println("✅ Seeded 6 default players successfully")
 }
