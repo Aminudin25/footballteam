@@ -4,11 +4,13 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt"
+	"github.com/joho/godotenv"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
@@ -24,15 +26,38 @@ import (
 )
 
 func main() {
-	// Konfigurasi koneksi database
-	dsn := "root:@tcp(127.0.0.1:3306)/footballteam?charset=utf8mb4&parseTime=True&loc=Local"
+	// =========================
+	// Load .env
+	// =========================
+	err := godotenv.Load()
+	if err != nil {
+		log.Println("❌ Warning: .env file not found, using default environment variables")
+	}
+
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
+
+	dbUser := os.Getenv("DB_USER")
+	dbPassword := os.Getenv("DB_PASSWORD")
+	dbHost := os.Getenv("DB_HOST")
+	dbPort := os.Getenv("DB_PORT")
+	dbName := os.Getenv("DB_NAME")
+
+	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=True&loc=Local",
+		dbUser, dbPassword, dbHost, dbPort, dbName,
+	)
+
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	if err != nil {
-		log.Fatal("Failed to connect to database: ", err)
+		log.Fatal("❌ Failed to connect to database: ", err)
 	}
 	fmt.Println("✅ Database connection successful")
 
-	// Auto-migrate: membuat tabel berdasarkan struct
+	// =========================
+	// Auto migrate tables
+	// =========================
 	err = db.AutoMigrate(
 		&user.User{},
 		&team.Team{},
@@ -46,17 +71,22 @@ func main() {
 	}
 	fmt.Println("✅ Database migration completed")
 
-	// Jalankan seeder admin
+	// =========================
+	// Seeder
+	// =========================
 	seedAdminUser(db)
 	seedTeams(db)
 	seedPlayers(db)
 	seedMatch(db)
 	seedMatchResults(db)
-	
+
+	// =========================
+	// Services & Handlers
+	// =========================
 	authService := auth.NewService()
 
 	userRepository := user.NewRepository(db)
-	userService := user.NewService(userRepository) 
+	userService := user.NewService(userRepository)
 	userHandler := handler.NewUserHandler(userService, authService)
 
 	teamRepository := team.NewRepository(db)
@@ -75,8 +105,9 @@ func main() {
 	matchResultService := match_result.NewService(matchResultRepository, playerService, matchService)
 	matchResultHandler := handler.NewMatchResultHandler(matchResultService, playerService)
 
-
-
+	// =========================
+	// Router
+	// =========================
 	router := gin.Default()
 	api := router.Group("/api/v1")
 
@@ -101,46 +132,48 @@ func main() {
 	api.GET("/match_results/:id", matchResultHandler.GetMatchResultByID)
 	api.GET("/match_results/report", matchResultHandler.GetMatchResultsReport)
 
-	// Protected routes (only admin)
+	// Protected routes (admin only)
 	protected := api.Group("/")
 	protected.Use(authMiddleware(authService, userService))
 
-	// Teams
+	// Teams (admin)
 	protected.POST("/teams", teamHandler.CreateTeam)
 	protected.PUT("/teams/:id", teamHandler.UpdateTeam)
 	protected.DELETE("/teams/:id", teamHandler.DeleteTeam)
 	protected.POST("/teams/:id/logo", teamHandler.UploadLogo)
 
-	// Players
+	// Players (admin)
 	protected.POST("/players", playerHandler.CreatePlayer)
 	protected.PUT("/players/:id", playerHandler.UpdatePlayer)
 	protected.DELETE("/players/:id", playerHandler.DeletePlayer)
 
-	// Matches
+	// Matches (admin)
 	protected.POST("/matches", matchHandler.CreateMatch)
 	protected.PUT("/matches/:id", matchHandler.UpdateMatch)
 	protected.DELETE("/matches/:id", matchHandler.DeleteMatch)
 
-	// MatchResults
+	// MatchResults (admin)
 	protected.POST("/match_results", matchResultHandler.CreateMatchResult)
 
+	// Static uploads
 	api.Static("/uploads", "./uploads")
-	router.Run()
 
-	
+	// Start server
+	router.Run(":" + port)
 }
 
+// =========================
+// Middleware: Auth JWT
+// =========================
 func authMiddleware(authService auth.Service, userService user.Service) gin.HandlerFunc {
-	return func (c *gin.Context) {
+	return func(c *gin.Context) {
 		authHeader := c.GetHeader("Authorization")
-
 		if !strings.Contains(authHeader, "Bearer") {
 			response := helper.APIResponse("Unauthorized", http.StatusUnauthorized, "error", nil)
 			c.AbortWithStatusJSON(http.StatusUnauthorized, response)
 			return
 		}
 
-		// Bearer tokentokentoken
 		tokenString := ""
 		arrayToken := strings.Split(authHeader, " ")
 		if len(arrayToken) == 2 {
@@ -162,7 +195,6 @@ func authMiddleware(authService auth.Service, userService user.Service) gin.Hand
 		}
 
 		userID := int(claim["user_id"].(float64))
-		
 		user, err := userService.GetUserByID(userID)
 		if err != nil {
 			response := helper.APIResponse("Unauthorized", http.StatusUnauthorized, "error", nil)
@@ -171,30 +203,39 @@ func authMiddleware(authService auth.Service, userService user.Service) gin.Hand
 		}
 
 		c.Set("currentUser", user)
-
 		c.Next()
-
 	}
 }
 
 
-
 // Seeder admin user default
 func seedAdminUser(db *gorm.DB) {
+	adminName := os.Getenv("ADMIN_NAME")
+	if adminName == "" {
+		adminName = "Admin"
+	}
+	adminEmail := os.Getenv("ADMIN_EMAIL")
+	if adminEmail == "" {
+		adminEmail = "admin@xyz.com"
+	}
+	adminPassword := os.Getenv("ADMIN_PASSWORD")
+	if adminPassword == "" {
+		adminPassword = "admin123"
+	}
+
 	var count int64
-	db.Model(&user.User{}).Where("email = ?", "admin@xyz.com").Count(&count)
+	db.Model(&user.User{}).Where("email = ?", adminEmail).Count(&count)
 
 	if count == 0 {
 		// Hash password
-		password := "admin123"
-		hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+		hashedPassword, err := bcrypt.GenerateFromPassword([]byte(adminPassword), bcrypt.DefaultCost)
 		if err != nil {
 			log.Fatal("Failed to hash password:", err)
 		}
 
 		admin := user.User{
-			Name:         "Admin",
-			Email:        "admin@xyz.com",
+			Name:         adminName,
+			Email:        adminEmail,
 			PasswordHash: string(hashedPassword),
 			CreatedAt:    time.Now(),
 			UpdatedAt:    time.Now(),
@@ -204,7 +245,7 @@ func seedAdminUser(db *gorm.DB) {
 			log.Fatal("Failed to seed admin user:", err)
 		}
 
-		fmt.Println("✅ Admin user seeded successfully (email: admin@xyz.com, password: admin123)")
+		fmt.Printf("✅ Admin user seeded successfully (email: %s, password: %s)\n", adminEmail, adminPassword)
 	} else {
 		fmt.Println("ℹ️ Admin user already exists, skipping seeder.")
 	}

@@ -1,0 +1,25 @@
+# Go modules
+/vendor/
+
+# Binary files
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+
+# IDE/editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Environment files
+.env
+
+# Uploads
+/uploads/logo/
+/uploads/*
+!uploads/.gitkeep  # Optional: agar folder uploads tetap bisa tersimpan kosong
