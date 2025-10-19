@@ -3,15 +3,19 @@ package main
 import (
 	"fmt"
 	"log"
+	"net/http"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/golang-jwt/jwt"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 
 	"footballteam/auth"
 	"footballteam/handler"
+	"footballteam/helper"
 	"footballteam/team"
 	"footballteam/user"
 )
@@ -59,14 +63,60 @@ func main() {
 	api.POST("/teams", teamHandler.CreateTeam)
 	api.PUT("/teams/:id", teamHandler.UpdateTeam)
 	api.DELETE("/teams/:id", teamHandler.DeleteTeam)
-	api.POST("teams/logo/:id", teamHandler.UploadLogo)
+	api.POST("teams/:id/logo", authMiddleware(authService, userService) , teamHandler.UploadLogo)
 
 	api.Static("/uploads", "./uploads")
 
 	router.Run()
 	
-
 }
+
+func authMiddleware(authService auth.Service, userService user.Service) gin.HandlerFunc {
+	return func (c *gin.Context) {
+		authHeader := c.GetHeader("Authorization")
+
+		if !strings.Contains(authHeader, "Bearer") {
+			response := helper.APIResponse("Unauthorized", http.StatusUnauthorized, "error", nil)
+			c.AbortWithStatusJSON(http.StatusUnauthorized, response)
+			return
+		}
+
+		// Bearer tokentokentoken
+		tokenString := ""
+		arrayToken := strings.Split(authHeader, " ")
+		if len(arrayToken) == 2 {
+			tokenString = arrayToken[1]
+		}
+
+		token, err := authService.ValidateToken(tokenString)
+		if err != nil {
+			response := helper.APIResponse("Unauthorized", http.StatusUnauthorized, "error", nil)
+			c.AbortWithStatusJSON(http.StatusUnauthorized, response)
+			return
+		}
+
+		claim, ok := token.Claims.(jwt.MapClaims)
+		if !ok || !token.Valid {
+			response := helper.APIResponse("Unauthorized", http.StatusUnauthorized, "error", nil)
+			c.AbortWithStatusJSON(http.StatusUnauthorized, response)
+			return
+		}
+
+		userID := int(claim["user_id"].(float64))
+		
+		user, err := userService.GetUserByID(userID)
+		if err != nil {
+			response := helper.APIResponse("Unauthorized", http.StatusUnauthorized, "error", nil)
+			c.AbortWithStatusJSON(http.StatusUnauthorized, response)
+			return
+		}
+
+		c.Set("currentUser", user)
+
+	}
+}
+
+
 
 // Seeder admin user default
 func seedAdminUser(db *gorm.DB) {

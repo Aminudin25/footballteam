@@ -8,6 +8,7 @@ import (
 
 type Service interface {
 	Login(input LoginUserInput) (User, error)
+	GetUserByID(ID int) (User, error)
 }
 
 type service struct {
@@ -38,3 +39,18 @@ func (s *service) Login(input LoginUserInput) (User, error) {
 
 	return user, nil
 }
+
+func (s *service) GetUserByID(ID int) (User, error) {
+	user, err := s.repository.FindByID(ID)
+
+	if err != nil {
+		return user, err
+	}
+
+	if user.ID == 0 {
+		return user, errors.New("No User Found on that ID")
+	}
+
+	return user, nil
+}
+
