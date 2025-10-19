@@ -25,6 +25,7 @@ cd footballteam
 2. Install dependency:
 ```bash
 go mod tidy
+```
 
 3. Copy .env.example menjadi .env dan ubah sesuai kebutuhan:
 DB_USER=root
@@ -35,7 +36,9 @@ DB_NAME=footballteam
 APP_PORT=8080
 
 ## Menjalankan Proyek
+```bash
 go run main.go
+```
 
 ## Dokumentasi API Postman
 https://documenter.getpostman.com/view/9770363/2sB3QQJo4R
