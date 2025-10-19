@@ -11,6 +11,7 @@ import (
 	"gorm.io/gorm"
 
 	"footballteam/handler"
+	"footballteam/team"
 	"footballteam/user"
 )
 
@@ -24,7 +25,10 @@ func main() {
 	fmt.Println("✅ Database connection successful")
 
 	// Auto-migrate: membuat tabel berdasarkan struct
-	err = db.AutoMigrate(&user.User{})
+	err = db.AutoMigrate(
+		&user.User{},
+		&team.Team{},
+	)
 	if err != nil {
 		log.Fatal("❌ Failed to migrate:", err)
 	}
@@ -32,15 +36,29 @@ func main() {
 
 	// Jalankan seeder admin
 	seedAdminUser(db)
+	seedTeams(db)
 
 	userRepository := user.NewRepository(db)
 	userService := user.NewService(userRepository) 
 	userHandler := handler.NewUserHandler(userService)
 
+	teamRepository := team.NewRepository(db)
+	teamService := team.NewService(teamRepository)
+	teamHandler := handler.NewTeamHandler(teamService)
+
 	router := gin.Default()
 	api := router.Group("/api/v1")
 
 	api.POST("/sessions", userHandler.Login)
+
+	api.GET("/teams", teamHandler.GetTeams)
+	api.GET("/teams/:id", teamHandler.GetTeamByID)
+	api.POST("/teams", teamHandler.CreateTeam)
+	api.PUT("/teams/:id", teamHandler.UpdateTeam)
+	api.DELETE("/teams/:id", teamHandler.DeleteTeam)
+	api.POST("teams/logo/:id", teamHandler.UploadLogo)
+
+	api.Static("/uploads", "./uploads")
 
 	router.Run()
 	
@@ -76,4 +94,41 @@ func seedAdminUser(db *gorm.DB) {
 	} else {
 		fmt.Println("ℹ️ Admin user already exists, skipping seeder.")
 	}
+}
+
+func seedTeams(db *gorm.DB) {
+	var count int64
+	db.Model(&team.Team{}).Count(&count)
+	if count > 0 {
+		fmt.Println("Teams already exist, skipping seeder...")
+		return
+	}
+
+	teams := []team.Team{
+		{
+			Name:        "Garuda FC",
+			Logo:        "",
+			YearFounded: 1998,
+			Address:     "Jl. Merdeka No. 1",
+			City:        "Jakarta",
+			CreatedAt:   time.Now(),
+			UpdatedAt:   time.Now(),
+		},
+		{
+			Name:        "Pahlawan FC",
+			Logo:        "",
+			YearFounded:  2005,
+			Address:     "Jl. Pahlawan No. 7",
+			City:        "Surabaya",
+			CreatedAt:   time.Now(),
+			UpdatedAt:   time.Now(),
+		},
+	}
+
+	if err := db.Create(&teams).Error; err != nil {
+		log.Println("Failed to seed teams:", err)
+		return
+	}
+
+	fmt.Println("✅ Seeded 2 default teams successfully")
 }
